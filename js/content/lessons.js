@@ -1,0 +1,378 @@
+// Content pack: "Spain Survival Spanish" — 80/20 curriculum for a Spain trip.
+// Each lesson has: id, title, subtitle, icon, tips (grammar notes shown before drilling),
+// and items: { es, de, ex_es?, ex_de?, note? }
+// Card ids are derived as `${lessonId}-${index}` at load time (see core/content.js).
+
+export const LESSON_PACK_ID = "core-es";
+export const LESSON_PACK_VERSION = 1;
+
+export const LESSONS = [
+  {
+    id: "greetings",
+    title: "Begrüßung & Höflichkeit",
+    subtitle: "Hola, Adiós, Bitte, Danke",
+    icon: "👋",
+    tips: [
+      "Auf „¿Qué tal?“ antwortet man in Spanien oft nicht nur mit „bien“, sondern wirft die Frage einfach zurück: „¡Hola! ¿Qué tal?“ – „Bien, ¿y tú?“ oder auch direkt „¡Hola, qué tal!“ als Gruß."
+    ],
+    items: [
+      { es: "Hola", de: "Hallo" },
+      { es: "Buenos días", de: "Guten Morgen", note: "bis ca. Mittag" },
+      { es: "Buenas tardes", de: "Guten Tag / Guten Nachmittag", note: "Mittag bis Abend" },
+      { es: "Buenas noches", de: "Guten Abend / Gute Nacht" },
+      { es: "¿Qué tal?", de: "Wie geht's?", note: "informell, oft auch als Gruß benutzt", ex_es: "¡Hola! ¿Qué tal?", ex_de: "Hallo! Wie geht's?" },
+      { es: "¿Cómo estás?", de: "Wie geht es dir?" },
+      { es: "Muy bien, gracias", de: "Sehr gut, danke" },
+      { es: "Bien, ¿y tú?", de: "Gut, und dir?" },
+      { es: "Así así", de: "Geht so" },
+      { es: "Adiós", de: "Tschüss / Auf Wiedersehen" },
+      { es: "Hasta luego", de: "Bis später" },
+      { es: "Hasta mañana", de: "Bis morgen" },
+      { es: "Hasta pronto", de: "Bis bald" },
+      { es: "Por favor", de: "Bitte" },
+      { es: "Gracias", de: "Danke" },
+      { es: "Muchas gracias", de: "Vielen Dank" },
+      { es: "De nada", de: "Gern geschehen / Keine Ursache" },
+      { es: "Perdón", de: "Entschuldigung / Verzeihung" },
+      { es: "Perdona", de: "Entschuldige", note: "informell (tú)" },
+      { es: "Disculpe", de: "Entschuldigen Sie", note: "höflich (usted)" },
+      { es: "Lo siento", de: "Es tut mir leid" },
+      { es: "Sí", de: "Ja" },
+      { es: "No", de: "Nein" },
+      { es: "Vale", de: "Okay / In Ordnung" },
+      { es: "Encantado/a", de: "Freut mich", note: "beim Kennenlernen" },
+      { es: "Mucho gusto", de: "Sehr erfreut" },
+      { es: "Buen provecho", de: "Guten Appetit" },
+      { es: "Salud", de: "Gesundheit", note: "beim Niesen oder als Prost" }
+    ]
+  },
+  {
+    id: "questions",
+    title: "Fragewörter",
+    subtitle: "Qué, Dónde, Cuánto...",
+    icon: "❓",
+    tips: [
+      "Fragewörter tragen im Spanischen immer einen Akzent: qué, quién, cómo, cuándo, dónde, por qué, cuál, cuánto.",
+      "„¿Adónde?“ (wohin) und „¿De dónde?“ (woher) sind Kombinationen mit „¿dónde?“ (wo)."
+    ],
+    items: [
+      { es: "¿Qué?", de: "Was?", ex_es: "¿Qué es esto?", ex_de: "Was ist das?" },
+      { es: "¿Quién?", de: "Wer?", ex_es: "¿Quién es?", ex_de: "Wer ist das?" },
+      { es: "¿Cómo?", de: "Wie?", ex_es: "¿Cómo te llamas?", ex_de: "Wie heißt du?" },
+      { es: "¿Cuándo?", de: "Wann?", ex_es: "¿Cuándo abre?", ex_de: "Wann öffnet es?" },
+      { es: "¿Dónde?", de: "Wo?", ex_es: "¿Dónde está el baño?", ex_de: "Wo ist die Toilette?" },
+      { es: "¿Adónde?", de: "Wohin?", ex_es: "¿Adónde vamos?", ex_de: "Wohin gehen wir?" },
+      { es: "¿De dónde?", de: "Woher?", ex_es: "¿De dónde eres?", ex_de: "Woher kommst du?" },
+      { es: "¿Por qué?", de: "Warum?" },
+      { es: "¿Para qué?", de: "Wofür / Wozu?" },
+      { es: "¿Cuál?", de: "Welcher / Welche?", ex_es: "¿Cuál prefieres?", ex_de: "Welchen bevorzugst du?" },
+      { es: "¿Cuáles?", de: "Welche?", note: "Plural von cuál" },
+      { es: "¿Cuánto?", de: "Wie viel?", ex_es: "¿Cuánto cuesta esto?", ex_de: "Wie viel kostet das?" },
+      { es: "¿Cuánto tiempo?", de: "Wie lange?" },
+      { es: "¿Cuántos/Cuántas?", de: "Wie viele?", note: "richtet sich nach dem Geschlecht des Nomens" },
+      { es: "¿A qué hora?", de: "Um wie viel Uhr?", ex_es: "¿A qué hora abre?", ex_de: "Um wie viel Uhr öffnet es?" },
+      { es: "¿Qué hora es?", de: "Wie spät ist es?" }
+    ]
+  },
+  {
+    id: "numbers",
+    title: "Zahlen",
+    subtitle: "0–1000, Preise verstehen",
+    icon: "🔢",
+    tips: [
+      "„Uno“ wird vor männlichen Nomen zu „un“ (un café), vor weiblichen zu „una“ (una cerveza).",
+      "Ab 200 stimmt die Zahl mit dem Geschlecht überein: doscientos euros, doscientas personas."
+    ],
+    items: [
+      { es: "cero", de: "null" }, { es: "uno", de: "eins" }, { es: "dos", de: "zwei" },
+      { es: "tres", de: "drei" }, { es: "cuatro", de: "vier" }, { es: "cinco", de: "fünf" },
+      { es: "seis", de: "sechs" }, { es: "siete", de: "sieben" }, { es: "ocho", de: "acht" },
+      { es: "nueve", de: "neun" }, { es: "diez", de: "zehn" }, { es: "once", de: "elf" },
+      { es: "doce", de: "zwölf" }, { es: "trece", de: "dreizehn" }, { es: "catorce", de: "vierzehn" },
+      { es: "quince", de: "fünfzehn" }, { es: "dieciséis", de: "sechzehn" }, { es: "diecisiete", de: "siebzehn" },
+      { es: "dieciocho", de: "achtzehn" }, { es: "diecinueve", de: "neunzehn" }, { es: "veinte", de: "zwanzig" },
+      { es: "veintiuno", de: "einundzwanzig" }, { es: "treinta", de: "dreißig" },
+      { es: "cuarenta", de: "vierzig" }, { es: "cincuenta", de: "fünfzig" }, { es: "sesenta", de: "sechzig" },
+      { es: "setenta", de: "siebzig" }, { es: "ochenta", de: "achtzig" }, { es: "noventa", de: "neunzig" },
+      { es: "cien", de: "hundert" }, { es: "ciento uno", de: "hunderteins" },
+      { es: "doscientos", de: "zweihundert" }, { es: "quinientos", de: "fünfhundert" },
+      { es: "mil", de: "tausend" }, { es: "un millón", de: "eine Million" },
+      { es: "medio / media", de: "halb", ex_es: "medio kilo", ex_de: "ein halbes Kilo" },
+      { es: "un par de...", de: "ein paar..." }
+    ]
+  },
+  {
+    id: "colors",
+    title: "Farben",
+    subtitle: "Rojo, azul, verde...",
+    icon: "🎨",
+    tips: ["Farben passen sich in Geschlecht und Zahl an: el coche rojo, la casa roja, los coches rojos."],
+    items: [
+      { es: "rojo/a", de: "rot" }, { es: "azul", de: "blau" }, { es: "verde", de: "grün" },
+      { es: "amarillo/a", de: "gelb" }, { es: "naranja", de: "orange" }, { es: "morado/a", de: "lila" },
+      { es: "rosa", de: "rosa" }, { es: "blanco/a", de: "weiß" }, { es: "negro/a", de: "schwarz" },
+      { es: "gris", de: "grau" }, { es: "marrón", de: "braun" }, { es: "dorado/a", de: "golden" },
+      { es: "plateado/a", de: "silbern" },
+      { es: "claro/a", de: "hell", ex_es: "azul claro", ex_de: "hellblau" },
+      { es: "oscuro/a", de: "dunkel", ex_es: "verde oscuro", ex_de: "dunkelgrün" }
+    ]
+  },
+  {
+    id: "time",
+    title: "Uhrzeit, Tage & Monate",
+    subtitle: "¿Qué hora es? Hoy, mañana...",
+    icon: "🕒",
+    tips: [
+      "Für 1 Uhr: „Es la una“. Ab 2 Uhr: „Son las dos/tres/...“.",
+      "Halb = y media, Viertel nach = y cuarto, Viertel vor = menos cuarto."
+    ],
+    items: [
+      { es: "¿Qué hora es?", de: "Wie spät ist es?" },
+      { es: "Es la una", de: "Es ist ein Uhr" },
+      { es: "Son las dos", de: "Es ist zwei Uhr" },
+      { es: "Es la una y media", de: "Es ist halb zwei", note: "1:30" },
+      { es: "Son las tres y cuarto", de: "Es ist viertel nach drei" },
+      { es: "Son las cuatro menos cuarto", de: "Es ist viertel vor vier" },
+      { es: "de la mañana", de: "morgens" }, { es: "de la tarde", de: "nachmittags" },
+      { es: "de la noche", de: "abends / nachts" },
+      { es: "hoy", de: "heute" }, { es: "mañana", de: "morgen" }, { es: "ayer", de: "gestern" },
+      { es: "ahora", de: "jetzt" }, { es: "luego / después", de: "später / danach" },
+      { es: "temprano", de: "früh" }, { es: "tarde", de: "spät" },
+      { es: "la semana", de: "die Woche" }, { es: "el fin de semana", de: "das Wochenende" },
+      { es: "lunes", de: "Montag" }, { es: "martes", de: "Dienstag" }, { es: "miércoles", de: "Mittwoch" },
+      { es: "jueves", de: "Donnerstag" }, { es: "viernes", de: "Freitag" }, { es: "sábado", de: "Samstag" },
+      { es: "domingo", de: "Sonntag" },
+      { es: "enero", de: "Januar" }, { es: "febrero", de: "Februar" }, { es: "marzo", de: "März" },
+      { es: "abril", de: "April" }, { es: "mayo", de: "Mai" }, { es: "junio", de: "Juni" },
+      { es: "julio", de: "Juli" }, { es: "agosto", de: "August" }, { es: "septiembre", de: "September" },
+      { es: "octubre", de: "Oktober" }, { es: "noviembre", de: "November" }, { es: "diciembre", de: "Dezember" }
+    ]
+  },
+  {
+    id: "verbs-core",
+    title: "Die Grundverben",
+    subtitle: "ser, estar, tener, hay",
+    icon: "🧩",
+    tips: [
+      "SER = dauerhafte Identität (Herkunft, Beruf, Charakter). ESTAR = Zustand, Ort, vorübergehendes Gefühl.",
+      "TENER = haben (auch für Alter, Hunger, Durst: tengo hambre/sed/años).",
+      "HAY (von haber) ist unveränderlich und heißt „es gibt“ — für Ein- und Mehrzahl gleich."
+    ],
+    items: [
+      { es: "yo soy", de: "ich bin", note: "ser – Identität", ex_es: "Soy alemán.", ex_de: "Ich bin Deutscher." },
+      { es: "tú eres", de: "du bist", note: "ser" },
+      { es: "él/ella/usted es", de: "er/sie ist, Sie sind", note: "ser" },
+      { es: "nosotros somos", de: "wir sind", note: "ser" },
+      { es: "vosotros sois", de: "ihr seid", note: "ser (Spanien)" },
+      { es: "ellos/ellas/ustedes son", de: "sie sind, Sie sind", note: "ser" },
+      { es: "yo estoy", de: "ich bin", note: "estar – Zustand/Ort", ex_es: "Estoy cansado.", ex_de: "Ich bin müde." },
+      { es: "tú estás", de: "du bist", note: "estar" },
+      { es: "él/ella/usted está", de: "er/sie ist, Sie sind", note: "estar", ex_es: "¿Dónde está la playa?", ex_de: "Wo ist der Strand?" },
+      { es: "nosotros estamos", de: "wir sind", note: "estar" },
+      { es: "vosotros estáis", de: "ihr seid", note: "estar" },
+      { es: "ellos/ellas/ustedes están", de: "sie sind, Sie sind", note: "estar" },
+      { es: "yo tengo", de: "ich habe", note: "tener", ex_es: "Tengo hambre.", ex_de: "Ich habe Hunger." },
+      { es: "tú tienes", de: "du hast", note: "tener" },
+      { es: "él/ella/usted tiene", de: "er/sie hat, Sie haben", note: "tener" },
+      { es: "nosotros tenemos", de: "wir haben", note: "tener" },
+      { es: "vosotros tenéis", de: "ihr habt", note: "tener" },
+      { es: "ellos/ellas/ustedes tienen", de: "sie haben, Sie haben", note: "tener" },
+      { es: "hay", de: "es gibt", note: "haber (unveränderlich)", ex_es: "Hay un baño aquí.", ex_de: "Es gibt hier eine Toilette." },
+      { es: "no hay", de: "es gibt nicht / keine", ex_es: "No hay mesas libres.", ex_de: "Es gibt keine freien Tische." }
+    ]
+  },
+  {
+    id: "verbs-action",
+    title: "Handlungsverben",
+    subtitle: "querer, poder, ir, hacer, gustar",
+    icon: "⚡",
+    tips: [
+      "querer/poder sind Stammbrechende Verben (e→ie / o→ue) in allen Formen außer nosotros/vosotros.",
+      "gustar wird „verdreht“ benutzt: me gusta (mir gefällt), te gusta, le gusta... — das Subjekt ist die Sache, die gefällt."
+    ],
+    items: [
+      { es: "quiero", de: "ich möchte / will", note: "querer", ex_es: "Quiero un café.", ex_de: "Ich möchte einen Kaffee." },
+      { es: "quieres", de: "du möchtest", note: "querer" },
+      { es: "quiere", de: "er/sie möchte, Sie möchten", note: "querer" },
+      { es: "queremos", de: "wir möchten", note: "querer" },
+      { es: "queréis", de: "ihr möchtet", note: "querer" },
+      { es: "quieren", de: "sie/Sie möchten", note: "querer" },
+      { es: "puedo", de: "ich kann", note: "poder", ex_es: "¿Puedo pagar con tarjeta?", ex_de: "Kann ich mit Karte zahlen?" },
+      { es: "puedes", de: "du kannst", note: "poder" },
+      { es: "puede", de: "er/sie kann, Sie können", note: "poder", ex_es: "¿Puede ayudarme?", ex_de: "Können Sie mir helfen?" },
+      { es: "podemos", de: "wir können", note: "poder" },
+      { es: "podéis", de: "ihr könnt", note: "poder" },
+      { es: "pueden", de: "sie/Sie können", note: "poder" },
+      { es: "voy", de: "ich gehe/fahre", note: "ir", ex_es: "Voy a la playa.", ex_de: "Ich gehe zum Strand." },
+      { es: "vas", de: "du gehst/fährst", note: "ir" },
+      { es: "va", de: "er/sie geht, Sie gehen", note: "ir" },
+      { es: "vamos", de: "wir gehen", note: "ir", ex_es: "¡Vamos!", ex_de: "Auf geht's! / Los!" },
+      { es: "vais", de: "ihr geht", note: "ir" },
+      { es: "van", de: "sie/Sie gehen", note: "ir" },
+      { es: "hago", de: "ich mache", note: "hacer" },
+      { es: "haces", de: "du machst", note: "hacer" },
+      { es: "hace", de: "er/sie macht", note: "hacer", ex_es: "Hace calor.", ex_de: "Es ist heiß (Wetter)." },
+      { es: "hacemos", de: "wir machen", note: "hacer" },
+      { es: "necesito", de: "ich brauche", note: "necesitar", ex_es: "Necesito un médico.", ex_de: "Ich brauche einen Arzt." },
+      { es: "necesitas", de: "du brauchst", note: "necesitar" },
+      { es: "necesita", de: "er/sie braucht, Sie brauchen", note: "necesitar" },
+      { es: "me gusta", de: "mir gefällt / ich mag", note: "gustar (Singular)", ex_es: "Me gusta esta playa.", ex_de: "Mir gefällt dieser Strand." },
+      { es: "me gustan", de: "mir gefallen / ich mag", note: "gustar (Plural)", ex_es: "Me gustan las tapas.", ex_de: "Mir gefallen die Tapas." },
+      { es: "te gusta", de: "dir gefällt", note: "gustar" },
+      { es: "no me gusta", de: "mir gefällt nicht", note: "gustar" }
+    ]
+  },
+  {
+    id: "restaurant",
+    title: "Im Restaurant bestellen",
+    subtitle: "Speisekarte, bestellen, zahlen",
+    icon: "🍽️",
+    tips: ["„Quisiera...“ ist die höfliche Form von „quiero“ (ich möchte gerne) und klingt beim Bestellen freundlicher."],
+    items: [
+      { es: "la carta / el menú", de: "die Speisekarte" },
+      { es: "¿Tiene mesa para dos?", de: "Haben Sie einen Tisch für zwei?" },
+      { es: "Una reserva a nombre de...", de: "Eine Reservierung auf den Namen..." },
+      { es: "¿Qué me recomienda?", de: "Was empfehlen Sie mir?" },
+      { es: "Quisiera...", de: "Ich hätte gerne...", ex_es: "Quisiera la paella.", ex_de: "Ich hätte gerne die Paella." },
+      { es: "Para mí...", de: "Für mich...", ex_es: "Para mí, el pollo.", ex_de: "Für mich das Hähnchen." },
+      { es: "De primero / De segundo", de: "Als Vorspeise / Als Hauptgang" },
+      { es: "¿Qué lleva esto?", de: "Was ist da drin?" },
+      { es: "Soy vegetariano/a", de: "Ich bin Vegetarier/in" },
+      { es: "Soy alérgico/a a...", de: "Ich bin allergisch gegen..." },
+      { es: "Sin gluten", de: "Glutenfrei" },
+      { es: "Una botella de agua", de: "Eine Flasche Wasser" },
+      { es: "con/sin gas", de: "mit/ohne Kohlensäure" },
+      { es: "¡Camarero/a!", de: "Kellner/in! (um Aufmerksamkeit zu bekommen)" },
+      { es: "La cuenta, por favor", de: "Die Rechnung, bitte" },
+      { es: "¿Está incluido el servicio?", de: "Ist das Trinkgeld inbegriffen?" },
+      { es: "¿Aceptan tarjeta?", de: "Nehmen Sie Karte?" },
+      { es: "Para llevar", de: "Zum Mitnehmen" },
+      { es: "Para tomar aquí", de: "Zum Hieressen" },
+      { es: "¡Buen provecho!", de: "Guten Appetit!" },
+      { es: "Está buenísimo", de: "Das ist super lecker" }
+    ]
+  },
+  {
+    id: "food",
+    title: "Essen & Trinken",
+    subtitle: "Fleisch, Fisch, Tapas, Getränke",
+    icon: "🥘",
+    tips: [],
+    items: [
+      { es: "la carne", de: "das Fleisch" }, { es: "el pollo", de: "das Hähnchen" },
+      { es: "el cerdo", de: "das Schweinefleisch" }, { es: "la ternera", de: "das Kalb-/Rindfleisch" },
+      { es: "el cordero", de: "das Lammfleisch" }, { es: "el jamón", de: "der Schinken" },
+      { es: "el pescado", de: "der Fisch" }, { es: "el marisco", de: "die Meeresfrüchte" },
+      { es: "las gambas", de: "die Garnelen" }, { es: "los calamares", de: "die Tintenfischringe" },
+      { es: "el pan", de: "das Brot" }, { es: "el queso", de: "der Käse" },
+      { es: "el huevo", de: "das Ei" }, { es: "la ensalada", de: "der Salat" },
+      { es: "la sopa", de: "die Suppe" }, { es: "el arroz", de: "der Reis" },
+      { es: "las patatas", de: "die Kartoffeln" }, { es: "las verduras", de: "das Gemüse" },
+      { es: "la fruta", de: "das Obst" }, { es: "el postre", de: "die Nachspeise" },
+      { es: "el agua", de: "das Wasser" }, { es: "el vino (tinto/blanco)", de: "der Wein (rot/weiß)" },
+      { es: "la cerveza", de: "das Bier" }, { es: "una caña", de: "ein kleines Bier vom Fass" },
+      { es: "el café", de: "der Kaffee" }, { es: "el té", de: "der Tee" },
+      { es: "el zumo", de: "der Saft" }, { es: "las tapas", de: "kleine Appetithäppchen" },
+      { es: "la paella", de: "Paella (Reisgericht)" }, { es: "la tortilla (de patatas)", de: "spanisches Kartoffel-Omelett" },
+      { es: "el aceite de oliva", de: "das Olivenöl" }, { es: "picante", de: "scharf" },
+      { es: "dulce", de: "süß" }, { es: "salado/a", de: "salzig" }
+    ]
+  },
+  {
+    id: "shopping",
+    title: "Einkaufen",
+    subtitle: "Markt, Kleidung, Preise",
+    icon: "🛍️",
+    tips: [],
+    items: [
+      { es: "la tienda", de: "der Laden" }, { es: "el mercado", de: "der Markt" },
+      { es: "¿Cuánto cuesta esto?", de: "Wie viel kostet das?" },
+      { es: "¿Cuánto es en total?", de: "Wie viel macht das insgesamt?" },
+      { es: "Es muy caro", de: "Das ist sehr teuer" }, { es: "Es barato", de: "Das ist günstig" },
+      { es: "¿Tiene esto en talla...?", de: "Haben Sie das in Größe...?" },
+      { es: "más grande / más pequeño", de: "größer / kleiner" },
+      { es: "el probador", de: "die Umkleidekabine" },
+      { es: "en efectivo", de: "bar" }, { es: "con tarjeta", de: "mit Karte" },
+      { es: "las rebajas", de: "der Schlussverkauf / Sale" },
+      { es: "abierto / cerrado", de: "geöffnet / geschlossen" },
+      { es: "el recibo / el tique", de: "der Kassenbon" },
+      { es: "una bolsa", de: "eine Tüte" },
+      { es: "Solo estoy mirando, gracias", de: "Ich schaue nur, danke" },
+      { es: "Me lo llevo", de: "Ich nehme es" }
+    ]
+  },
+  {
+    id: "directions",
+    title: "Wegbeschreibung & Unterwegs",
+    subtitle: "Links, rechts, Bus, Bahnhof",
+    icon: "🧭",
+    tips: [],
+    items: [
+      { es: "¿Cómo llego a...?", de: "Wie komme ich zu...?" },
+      { es: "¿Está lejos?", de: "Ist es weit?" },
+      { es: "Está cerca", de: "Es ist in der Nähe" },
+      { es: "a la derecha", de: "rechts" }, { es: "a la izquierda", de: "links" },
+      { es: "todo recto", de: "geradeaus" },
+      { es: "la esquina", de: "die Ecke" },
+      { es: "la playa", de: "der Strand" }, { es: "el centro", de: "die Innenstadt" },
+      { es: "la parada de autobús", de: "die Bushaltestelle" },
+      { es: "la estación (de tren)", de: "der (Zug-)Bahnhof" },
+      { es: "el aeropuerto", de: "der Flughafen" },
+      { es: "un billete", de: "ein Ticket / eine Fahrkarte" },
+      { es: "ida y vuelta", de: "hin und zurück" }, { es: "solo ida", de: "nur hin" },
+      { es: "el taxi", de: "das Taxi" },
+      { es: "el alquiler de coches", de: "die Autovermietung" },
+      { es: "¿Para el centro?", de: "(Fährt das) zur Innenstadt?" }
+    ]
+  },
+  {
+    id: "emergency",
+    title: "Notfälle & Hilfe",
+    subtitle: "Arzt, Apotheke, Polizei",
+    icon: "🚨",
+    tips: [],
+    items: [
+      { es: "¡Ayuda!", de: "Hilfe!" },
+      { es: "Necesito un médico", de: "Ich brauche einen Arzt" },
+      { es: "la farmacia", de: "die Apotheke" }, { es: "el hospital", de: "das Krankenhaus" },
+      { es: "Me duele aquí", de: "Es tut hier weh" },
+      { es: "Me duele la cabeza", de: "Ich habe Kopfschmerzen" },
+      { es: "No me encuentro bien", de: "Ich fühle mich nicht gut" },
+      { es: "una ambulancia", de: "ein Krankenwagen" },
+      { es: "la policía", de: "die Polizei" },
+      { es: "He perdido mi pasaporte", de: "Ich habe meinen Pass verloren" },
+      { es: "Me han robado", de: "Ich wurde bestohlen" },
+      { es: "una alergia", de: "eine Allergie" },
+      { es: "el seguro (de viaje)", de: "die (Reise-)Versicherung" },
+      { es: "la embajada", de: "die Botschaft" },
+      { es: "Llame a un médico, por favor", de: "Rufen Sie bitte einen Arzt" }
+    ]
+  },
+  {
+    id: "smalltalk",
+    title: "Small Talk & Alltag",
+    subtitle: "Sich vorstellen, Konversation",
+    icon: "💬",
+    tips: [],
+    items: [
+      { es: "¿Cómo te llamas?", de: "Wie heißt du?" },
+      { es: "Me llamo...", de: "Ich heiße..." },
+      { es: "¿De dónde eres?", de: "Woher kommst du?" },
+      { es: "Soy de Alemania", de: "Ich komme aus Deutschland" },
+      { es: "¿Cuántos años tienes?", de: "Wie alt bist du?" },
+      { es: "Tengo... años", de: "Ich bin... Jahre alt" },
+      { es: "Estoy de vacaciones", de: "Ich bin im Urlaub" },
+      { es: "Estoy casado/a", de: "Ich bin verheiratet" },
+      { es: "mi mujer / mi marido", de: "meine Frau / mein Mann" },
+      { es: "¿Hablas inglés?", de: "Sprichst du Englisch?" },
+      { es: "Hablo un poco de español", de: "Ich spreche ein bisschen Spanisch" },
+      { es: "No entiendo", de: "Ich verstehe nicht" },
+      { es: "¿Puede repetir, por favor?", de: "Können Sie das bitte wiederholen?" },
+      { es: "Más despacio, por favor", de: "Langsamer, bitte" },
+      { es: "Estoy aprendiendo español", de: "Ich lerne Spanisch" },
+      { es: "¿Qué significa esto?", de: "Was bedeutet das?" },
+      { es: "¡Qué bien!", de: "Wie schön! / Klasse!" },
+      { es: "¡Qué bonito!", de: "Wie hübsch!" }
+    ]
+  }
+];
