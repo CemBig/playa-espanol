@@ -1,27 +1,52 @@
 // Central persistence: SRS review state, which cards/lessons have been introduced, and settings.
 // Everything lives in localStorage under one key so export/import is a single JSON blob.
 
-const STATE_KEY = "es_app_state_v1";
-const SCHEMA_VERSION = 1;
+const STATE_KEY = "es_app_state_v2";
+const LEGACY_KEY = "es_app_state_v1"; // index-based card ids, incompatible with the current scheme
+const SCHEMA_VERSION = 2;
 
 function defaultState() {
   return {
     version: SCHEMA_VERSION,
     srs: {}, // cardId -> { ef, interval, reps, lapses, due, lastReviewed }
     introducedCards: [], // cardIds that have entered the review pool
-    introducedLessons: [], // lessonIds the user has opened/started
+    introducedLessons: [], // lessonIds the user has started
     stats: { totalReviews: 0, streakDays: 0, lastStudyDate: null },
-    settings: { theme: "auto", direction: "mixed", ttsRate: 0.85, voiceURI: null }
+    settings: { theme: "auto", direction: "mixed", ttsRate: 0.85, voiceURI: null, newPerSession: 10 }
   };
 }
 
 let cache = null;
 
+// v1 stored card ids as `${lessonId}-${index}`, which broke whenever lesson content changed.
+// Those ids can't be mapped onto the current content-derived ids, so scheduling restarts —
+// but settings and the study streak are worth carrying over.
+function migrateLegacy(fresh) {
+  try {
+    const raw = localStorage.getItem(LEGACY_KEY);
+    if (!raw) return fresh;
+    const old = JSON.parse(raw);
+    if (old.settings) fresh.settings = { ...fresh.settings, ...old.settings };
+    if (old.stats) fresh.stats = { ...fresh.stats, ...old.stats };
+    localStorage.removeItem(LEGACY_KEY);
+  } catch {
+    /* ignore unreadable legacy state */
+  }
+  return fresh;
+}
+
 function read() {
   if (cache) return cache;
   try {
     const raw = localStorage.getItem(STATE_KEY);
-    cache = raw ? { ...defaultState(), ...JSON.parse(raw) } : defaultState();
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const base = defaultState();
+      cache = { ...base, ...parsed, settings: { ...base.settings, ...(parsed.settings || {}) } };
+    } else {
+      cache = migrateLegacy(defaultState());
+      write();
+    }
   } catch {
     cache = defaultState();
   }
@@ -29,7 +54,11 @@ function read() {
 }
 
 function write() {
-  localStorage.setItem(STATE_KEY, JSON.stringify(cache));
+  try {
+    localStorage.setItem(STATE_KEY, JSON.stringify(cache));
+  } catch {
+    /* storage full or blocked (private mode) — keep running in memory */
+  }
 }
 
 export function getState() {
@@ -41,8 +70,7 @@ export function getCardState(cardId) {
 }
 
 export function setCardState(cardId, state) {
-  const s = read();
-  s.srs[cardId] = state;
+  read().srs[cardId] = state;
   write();
 }
 
@@ -60,8 +88,10 @@ export function introduceCards(cardIds) {
 
 export function markLessonIntroduced(lessonId) {
   const s = read();
-  if (!s.introducedLessons.includes(lessonId)) s.introducedLessons.push(lessonId);
-  write();
+  if (!s.introducedLessons.includes(lessonId)) {
+    s.introducedLessons.push(lessonId);
+    write();
+  }
 }
 
 export function isLessonIntroduced(lessonId) {
@@ -72,8 +102,8 @@ export function recordReview() {
   const s = read();
   const today = new Date().toISOString().slice(0, 10);
   if (s.stats.lastStudyDate !== today) {
-    const y = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-    s.stats.streakDays = s.stats.lastStudyDate === y ? s.stats.streakDays + 1 : 1;
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    s.stats.streakDays = s.stats.lastStudyDate === yesterday ? s.stats.streakDays + 1 : 1;
     s.stats.lastStudyDate = today;
   }
   s.stats.totalReviews += 1;
@@ -98,9 +128,8 @@ export function downloadExport() {
   const blob = new Blob([exportStateJSON()], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  const date = new Date().toISOString().slice(0, 10);
   a.href = url;
-  a.download = `spanisch-fortschritt-${date}.json`;
+  a.download = `spanisch-fortschritt-${new Date().toISOString().slice(0, 10)}.json`;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -109,10 +138,11 @@ export function downloadExport() {
 
 export function importStateJSON(json) {
   const parsed = JSON.parse(json);
-  if (!parsed || typeof parsed !== "object" || !("srs" in parsed)) {
-    throw new Error("Ungültige Datei: kein gültiger Fortschritts-Export.");
+  if (!parsed || typeof parsed !== "object" || typeof parsed.srs !== "object") {
+    throw new Error("Keine gültige Fortschritts-Datei.");
   }
-  cache = { ...defaultState(), ...parsed };
+  const base = defaultState();
+  cache = { ...base, ...parsed, settings: { ...base.settings, ...(parsed.settings || {}) } };
   write();
   return cache;
 }

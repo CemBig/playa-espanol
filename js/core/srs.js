@@ -1,32 +1,62 @@
-// SM-2 spaced repetition (the same algorithm Anki's core scheduler is based on).
-// Quality buttons map to the classic 0-5 grades: Again=2, Hard=3, Good=4, Easy=5.
+// Spaced repetition based on SM-2 (the algorithm behind Anki's classic scheduler), with
+// Anki's refinement that Hard/Good/Easy produce genuinely different intervals instead of
+// only differing in their effect on the ease factor.
+//
+// Grades map to the classic 0-5 scale: Again=2, Hard=3, Good=4, Easy=5.
 
 export const GRADE = { AGAIN: 2, HARD: 3, GOOD: 4, EASY: 5 };
+
 const DAY_MS = 24 * 60 * 60 * 1000;
+const RELEARN_INTERVAL = 1 / 24; // ~1 hour
+const MAX_INTERVAL = 365 * 2;
+const MIN_EF = 1.3;
+const HARD_FACTOR = 1.2;
+const EASY_BONUS = 1.3;
 
 export function freshCardState() {
   return { ef: 2.5, interval: 0, reps: 0, lapses: 0, due: Date.now(), lastReviewed: null };
 }
 
-// Returns the next state given the previous SRS state and a grade (2-5).
+function nextInterval(state, grade) {
+  if (grade < GRADE.HARD) return RELEARN_INTERVAL;
+
+  // First successful pass over a new (or lapsed) card.
+  if (state.reps === 0) {
+    if (grade === GRADE.HARD) return 1;
+    if (grade === GRADE.GOOD) return 1;
+    return 4; // Easy skips ahead
+  }
+  // Second pass.
+  if (state.reps === 1) {
+    if (grade === GRADE.HARD) return Math.max(1, state.interval * HARD_FACTOR);
+    if (grade === GRADE.GOOD) return 6;
+    return 6 * EASY_BONUS;
+  }
+  // Mature card: grow by the ease factor.
+  if (grade === GRADE.HARD) return state.interval * HARD_FACTOR;
+  if (grade === GRADE.GOOD) return state.interval * state.ef;
+  return state.interval * state.ef * EASY_BONUS;
+}
+
+// Returns the next state for a card given its previous state and a grade (2-5).
+// Pure function: safe to call for previewing intervals without committing them.
 export function schedule(prevState, grade) {
   const state = prevState ? { ...prevState } : freshCardState();
-  const now = Date.now();
 
-  if (grade < 3) {
+  const interval = Math.min(MAX_INTERVAL, nextInterval(state, grade));
+
+  if (grade < GRADE.HARD) {
     state.reps = 0;
     state.lapses += 1;
-    state.interval = 1 / 24; // ~1 hour: come back soon within the same session/day
   } else {
-    if (state.reps === 0) state.interval = 1;
-    else if (state.reps === 1) state.interval = 6;
-    else state.interval = Math.round(state.interval * state.ef);
     state.reps += 1;
   }
 
-  state.ef = Math.max(1.3, state.ef + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02)));
-  state.due = now + state.interval * DAY_MS;
-  state.lastReviewed = now;
+  // SM-2 ease-factor update.
+  state.ef = Math.max(MIN_EF, state.ef + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02)));
+  state.interval = interval;
+  state.due = Date.now() + interval * DAY_MS;
+  state.lastReviewed = Date.now();
   return state;
 }
 
@@ -34,7 +64,7 @@ export function isDue(state) {
   return !state || state.due <= Date.now();
 }
 
-// Builds today's review queue: introduced cards that are due, oldest-due first.
+// Builds the review queue: introduced cards that are due, longest-overdue first.
 export function buildReviewQueue(allCards, introducedIds, srsMap) {
   const introduced = new Set(introducedIds);
   return allCards

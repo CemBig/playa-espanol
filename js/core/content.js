@@ -1,16 +1,35 @@
 // Turns raw lesson packs into a flat card index and keeps built-in + imported packs together.
 import { LESSONS as CORE_LESSONS, LESSON_PACK_ID, LESSON_PACK_VERSION } from "../content/lessons.js";
 
+// Card ids are derived from the Spanish text rather than the array position, so editing,
+// reordering or inserting items in lessons.js leaves existing review progress intact.
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "") // drop combining accents after NFD
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+}
+
 function buildCards(lesson) {
-  return lesson.items.map((item, i) => ({
-    id: `${lesson.id}-${i}`,
-    lessonId: lesson.id,
-    es: item.es,
-    de: item.de,
-    ex_es: item.ex_es || null,
-    ex_de: item.ex_de || null,
-    note: item.note || null
-  }));
+  const seen = new Map();
+  return lesson.items.map((item) => {
+    const base = `${lesson.id}:${slugify(item.es)}`;
+    // Guard against two items in one lesson slugifying to the same string.
+    const n = seen.get(base) || 0;
+    seen.set(base, n + 1);
+    return {
+      id: n === 0 ? base : `${base}~${n + 1}`,
+      lessonId: lesson.id,
+      es: item.es,
+      de: item.de,
+      ex_es: item.ex_es || null,
+      ex_de: item.ex_de || null,
+      note: item.note || null
+    };
+  });
 }
 
 function loadCustomPacks() {
@@ -31,8 +50,17 @@ export function getCustomPacks() {
 }
 
 export function addCustomPack(pack) {
-  if (!pack || !pack.lessons || !Array.isArray(pack.lessons)) {
-    throw new Error("Ungültiges Lektionspaket: erwartet { id, name, lessons: [...] }");
+  if (!pack || !Array.isArray(pack.lessons)) {
+    throw new Error("Ungültiges Lektionspaket: erwartet { id, lessons: [...] }");
+  }
+  if (!pack.id) throw new Error("Dem Lektionspaket fehlt eine id.");
+  for (const lesson of pack.lessons) {
+    if (!lesson.id || !Array.isArray(lesson.items)) {
+      throw new Error("Jede Lektion braucht id und items.");
+    }
+    if (lesson.items.some((it) => !it || !it.es || !it.de)) {
+      throw new Error("Jeder Eintrag braucht „es“ und „de“.");
+    }
   }
   const packs = loadCustomPacks();
   const idx = packs.findIndex((p) => p.id === pack.id);
@@ -43,8 +71,7 @@ export function addCustomPack(pack) {
 }
 
 export function removeCustomPack(packId) {
-  const packs = loadCustomPacks().filter((p) => p.id !== packId);
-  saveCustomPacks(packs);
+  saveCustomPacks(loadCustomPacks().filter((p) => p.id !== packId));
 }
 
 // Builds the full lesson+card registry from the core pack plus any user-imported packs.
@@ -53,15 +80,21 @@ export function getAllLessons() {
   const lessons = [];
   for (const pack of packs) {
     for (const lesson of pack.lessons) {
-      lessons.push({ ...lesson, packId: pack.id, cards: buildCards(lesson) });
+      lessons.push({
+        ...lesson,
+        tips: lesson.tips || [],
+        icon: lesson.icon || "⭐",
+        subtitle: lesson.subtitle || "",
+        packId: pack.id,
+        cards: buildCards(lesson)
+      });
     }
   }
   return lessons;
 }
 
 export function getAllCards() {
-  const lessons = getAllLessons();
-  return lessons.flatMap((l) => l.cards);
+  return getAllLessons().flatMap((l) => l.cards);
 }
 
 export function getCardById(id) {

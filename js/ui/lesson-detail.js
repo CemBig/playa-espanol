@@ -1,19 +1,8 @@
 import { getLessonById } from "../core/content.js";
-import { getState, introduceCards, markLessonIntroduced, setCardState } from "../core/storage.js";
+import { getState, introduceCards, markLessonIntroduced, setCardState, getSettings } from "../core/storage.js";
 import { freshCardState } from "../core/srs.js";
 import { speak } from "../core/pronunciation.js";
 import { toast } from "./toast.js";
-
-function cardHTML(card, { showBoth = true } = {}) {
-  return `
-    <div class="flashcard">
-      <button class="speak-btn" data-speak="${encodeURIComponent(card.es)}" title="Anhören">🔊</button>
-      <div class="es">${card.es}</div>
-      ${showBoth ? `<div class="de">${card.de}</div>` : ""}
-      ${card.note ? `<div class="note">${card.note}</div>` : ""}
-      ${card.ex_es ? `<div class="ex">${card.ex_es}<br>${card.ex_de}</div>` : ""}
-    </div>`;
-}
 
 function attachSpeakHandlers(root) {
   root.querySelectorAll("[data-speak]").forEach((btn) => {
@@ -21,24 +10,27 @@ function attachSpeakHandlers(root) {
   });
 }
 
+function tipsHTML(lesson) {
+  return lesson.tips.map((t) => `<div class="tip-box">💡 ${t}</div>`).join("");
+}
+
 function renderBrowse(root, lesson) {
   root.innerHTML = `
-    <div class="top-actions">
-      <a href="#/lessons" class="link-back">‹ Lektionen</a>
-    </div>
+    <div class="top-actions"><a href="#/lessons" class="link-back">‹ Lektionen</a></div>
     <h1>${lesson.icon} ${lesson.title}</h1>
-    <p>Schon gelernt &ndash; hier als schnelles Nachschlagewerk. Tippe 🔊 zum Anhören.</p>
-    ${lesson.tips.map((t) => `<div class="tip-box">💡 ${t}</div>`).join("")}
+    <p>Alles gelernt — hier als Nachschlagewerk. Tippe 🔊 zum Anhören.</p>
+    ${tipsHTML(lesson)}
     ${lesson.cards
       .map(
         (c) => `
-      <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      <div class="card row-card">
         <div>
-          <div style="font-weight:700;">${c.es}${c.note ? ` <span class="pill">${c.note}</span>` : ""}</div>
-          <div style="color:var(--fg-soft);font-size:0.9rem;">${c.de}</div>
-          ${c.ex_es ? `<div style="font-size:0.82rem;font-style:italic;color:var(--fg-soft);margin-top:4px;">${c.ex_es} — ${c.ex_de}</div>` : ""}
+          <div class="row-es">${c.es}</div>
+          <div class="row-de">${c.de}</div>
+          ${c.note ? `<div class="row-note">${c.note}</div>` : ""}
+          ${c.ex_es ? `<div class="row-ex">${c.ex_es} — ${c.ex_de}</div>` : ""}
         </div>
-        <button class="speak-btn" data-speak="${encodeURIComponent(c.es)}">🔊</button>
+        <button class="speak-btn" data-speak="${encodeURIComponent(c.es)}" aria-label="Anhören">🔊</button>
       </div>`
       )
       .join("")}
@@ -46,34 +38,62 @@ function renderBrowse(root, lesson) {
   attachSpeakHandlers(root);
 }
 
-function renderLearnFlow(root, lesson, newCards) {
+// Walks through a batch of new cards. Each card is committed to the review pool as soon as
+// it is shown, so quitting halfway keeps whatever was already studied.
+function renderLearnFlow(root, lesson, batch, remainingAfter) {
+  const settings = getSettings();
   let i = 0;
+  markLessonIntroduced(lesson.id);
+
+  function commit(card) {
+    introduceCards([card.id]);
+    setCardState(card.id, freshCardState());
+  }
+
+  function finish() {
+    toast(`${batch.length} neue Karte${batch.length === 1 ? "" : "n"} gelernt`);
+    root.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">🌟</div>
+        <h2>Runde geschafft</h2>
+        <p>${batch.length} neue Karte${batch.length === 1 ? "" : "n"} sind jetzt in deiner Wiederholung.
+        ${remainingAfter > 0 ? `In dieser Lektion warten noch ${remainingAfter}.` : "Diese Lektion ist komplett."}</p>
+        ${remainingAfter > 0 ? `<button class="btn block" id="more">Weiter lernen</button>` : ""}
+        <button class="btn ${remainingAfter > 0 ? "secondary" : ""} block" id="review" style="margin-top:8px;">Jetzt wiederholen</button>
+        <button class="btn ghost block" id="back" style="margin-top:8px;">Zu den Lektionen</button>
+      </div>`;
+    root.querySelector("#more")?.addEventListener("click", () => render(root, { id: lesson.id }));
+    root.querySelector("#review").addEventListener("click", () => (location.hash = "#/review"));
+    root.querySelector("#back").addEventListener("click", () => (location.hash = "#/lessons"));
+  }
 
   function step() {
-    if (i >= newCards.length) {
-      const ids = newCards.map((c) => c.id);
-      introduceCards(ids);
-      ids.forEach((id) => setCardState(id, freshCardState()));
-      markLessonIntroduced(lesson.id);
-      toast(`${newCards.length} neue Karten hinzugefügt`);
-      location.hash = `#/lesson/${lesson.id}`;
+    if (i >= batch.length) {
+      finish();
       return;
     }
-    const card = newCards[i];
+    const card = batch[i];
+    commit(card);
+
     root.innerHTML = `
       <div class="top-actions">
-        <a href="#/lessons" class="link-back">‹ Lektionen</a>
-        <span style="color:var(--fg-soft);font-size:0.85rem;">${i + 1}/${newCards.length}</span>
+        <a href="#/lessons" class="link-back">‹ Beenden</a>
+        <span class="counter">${i + 1}/${batch.length}</span>
       </div>
-      <h1>${lesson.icon} ${lesson.title}</h1>
-      ${i === 0 && lesson.tips.length ? lesson.tips.map((t) => `<div class="tip-box">💡 ${t}</div>`).join("") : ""}
-      ${cardHTML(card)}
+      <div class="progress-bar thin"><div style="width:${((i + 1) / batch.length) * 100}%"></div></div>
+      <div class="flashcard">
+        <button class="speak-btn" data-speak="${encodeURIComponent(card.es)}" aria-label="Anhören">🔊</button>
+        <div class="es">${card.es}</div>
+        <div class="de">${card.de}</div>
+        ${card.note ? `<div class="note">${card.note}</div>` : ""}
+        ${card.ex_es ? `<div class="ex">${card.ex_es}<br>${card.ex_de}</div>` : ""}
+      </div>
       <div class="center-col" style="margin-top:18px;">
-        <button class="btn block" id="next">${i + 1 >= newCards.length ? "Fertig" : "Weiter"}</button>
+        <button class="btn block" id="next">${i + 1 >= batch.length ? "Fertig" : "Weiter"}</button>
       </div>
     `;
     attachSpeakHandlers(root);
-    speak(card.es);
+    speak(card.es, { rate: settings.ttsRate });
     root.querySelector("#next").addEventListener("click", () => {
       i += 1;
       step();
@@ -86,9 +106,11 @@ function renderLearnFlow(root, lesson, newCards) {
 export function render(root, params) {
   const lesson = getLessonById(params.id);
   if (!lesson) {
-    root.innerHTML = `<p>Lektion nicht gefunden.</p>`;
+    root.innerHTML = `<div class="empty-state"><div class="emoji">🤔</div><h2>Lektion nicht gefunden</h2>
+      <button class="btn block" onclick="location.hash='#/lessons'">Zu den Lektionen</button></div>`;
     return;
   }
+
   const state = getState();
   const newCards = lesson.cards.filter((c) => !state.introducedCards.includes(c.id));
 
@@ -97,22 +119,29 @@ export function render(root, params) {
     return;
   }
 
+  const batchSize = Math.max(1, getSettings().newPerSession || 10);
+  const batch = newCards.slice(0, batchSize);
+  const remainingAfter = newCards.length - batch.length;
+  const learnedSoFar = lesson.cards.length - newCards.length;
+
   root.innerHTML = `
     <div class="top-actions"><a href="#/lessons" class="link-back">‹ Lektionen</a></div>
     <h1>${lesson.icon} ${lesson.title}</h1>
     <p>${lesson.subtitle}</p>
-    ${lesson.tips.map((t) => `<div class="tip-box">💡 ${t}</div>`).join("")}
+    ${tipsHTML(lesson)}
     <div class="card">
-      <h2>${newCards.length} neue Karte${newCards.length === 1 ? "" : "n"}</h2>
-      <p>Wir gehen sie kurz durch, danach landen sie automatisch in deiner täglichen Wiederholung.</p>
-      <button class="btn block" id="start-learn">Lektion lernen</button>
-      ${
-        newCards.length < lesson.cards.length
-          ? `<button class="btn ghost block" id="show-browse" style="margin-top:8px;">Bereits gelernte ansehen</button>`
+      <h2>${batch.length} neue Karte${batch.length === 1 ? "" : "n"}</h2>
+      <p>${
+        learnedSoFar > 0
+          ? `${learnedSoFar} von ${lesson.cards.length} hast du schon. `
           : ""
-      }
+      }Wir gehen sie einmal durch, danach übernimmt die Wiederholung.${
+        remainingAfter > 0 ? ` Danach bleiben noch ${remainingAfter} für später.` : ""
+      }</p>
+      <button class="btn block" id="start-learn">Lernen starten</button>
+      ${learnedSoFar > 0 ? `<button class="btn ghost block" id="show-browse" style="margin-top:8px;">Alle Vokabeln ansehen</button>` : ""}
     </div>
   `;
-  root.querySelector("#start-learn").addEventListener("click", () => renderLearnFlow(root, lesson, newCards));
+  root.querySelector("#start-learn").addEventListener("click", () => renderLearnFlow(root, lesson, batch, remainingAfter));
   root.querySelector("#show-browse")?.addEventListener("click", () => renderBrowse(root, lesson));
 }
